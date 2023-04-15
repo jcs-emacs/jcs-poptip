@@ -6,7 +6,7 @@
 ;; Maintainer: Shen, Jen-Chieh <jcs090218@gmail.com>
 ;; URL: https://github.com/jcs-emacs/jcs-poptip
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "26.1") (asoc "0.6.1") (company-dict "1.2.8") (lsp-ui "8.0.1") (preview-it "1.1.0") (define-it "0.2.5") (msgu "0.1.0" ) (elenv "0.1.0" ))
+;; Package-Requires: ((emacs "26.1") (company-dict "1.2.8") (lsp-ui "8.0.1") (preview-it "1.1.0") (define-it "0.2.5") (msgu "0.1.0" ) (elenv "0.1.0" ))
 ;; Keywords: help
 
 ;; This file is not part of GNU Emacs.
@@ -34,7 +34,6 @@
 (require 'elenv)
 (require 'msgu)
 
-(require 'asoc)
 (require 'company-dict)
 (require 'lsp-mode)
 (require 'lsp-ui)

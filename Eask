@@ -16,7 +16,6 @@
 (depends-on "emacs" "26.1")
 (depends-on "elenv")
 (depends-on "msgu")
-(depends-on "asoc")
 (depends-on "company-dict")
 (depends-on "lsp-ui")
 (depends-on "preview-it")
