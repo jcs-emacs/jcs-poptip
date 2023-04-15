@@ -124,8 +124,10 @@ forever delay.  HEIGHT of the tooltip that will display."
 
 (defun jcs-poptip--company-dict ()
   "Describe symbol at point."
-  (let* ((thing (jcs-poptip-2str (symbol-at-point)))
-         (desc (company-dict--quickhelp-string thing)))
+  (let* ((thing (jcs-poptip-2str (symbol-at-point)))  ; this has no use
+         (dicts (company-dict--relevant-dicts))
+         (mem (member thing dicts))                   ; it stores in text property
+         (desc (company-dict--quickhelp-string (car mem))))
     (jcs-poptip-create desc :point (point))))
 
 ;;;###autoload
