@@ -59,7 +59,7 @@
   :type 'string
   :group 'jcs-poptip)
 
-(defconst jcs-poptip--buffer-name "*jcs:pop-tooltip*"
+(defconst jcs-poptip--buffer-name "*jcs-poptip*"
   "Buffer name for posframe tooltip.")
 
 ;;
