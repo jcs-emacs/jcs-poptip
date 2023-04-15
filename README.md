@@ -13,6 +13,16 @@
 
 [![CI](https://github.com/jcs-emacs/jcs-poptip/actions/workflows/test.yml/badge.svg)](https://github.com/jcs-emacs/jcs-poptip/actions/workflows/test.yml)
 
+This package tries to show the information as hard as possible. Think of this as
+an all-in-one package. It uses these packages to grab the information:
+
+- [lsp-ui-doc][] - LSP is smart so don't often need to try other solutions.
+- `describe-thing` - Built-in describe thing at point
+- [company-dict][] - Like built-in `describe-thing` but try to show information
+from completion dictionary.
+- [preview-it][] - Preview `file`, `image`, `url`, and color at the point.
+- [define-it][] - Define, translate wiki the word.
+
 ## 🔨 Usage
 
 ```
@@ -30,3 +40,8 @@ If you would like to contribute to this project, you may either
 clone and make pull requests to this repository. Or you can 
 clone the project and establish your own branch of this tool. 
 Any methods are welcome!
+
+[lsp-ui-doc]: https://github.com/emacs-lsp/lsp-ui#lsp-ui-doc
+[preview-it]: https://github.com/jcs-elpa/preview-it
+[company-dict]: https://github.com/hlissner/emacs-company-dict
+[define-it]: https://github.com/jcs-elpa/define-it
