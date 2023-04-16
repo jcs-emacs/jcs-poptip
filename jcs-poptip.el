@@ -150,14 +150,14 @@ forever delay.  HEIGHT of the tooltip that will display."
         (desc))
     (msgu-silent
       (cl-some (lambda (backend)
-
+                 (funcall backend 'candidates thing)
                  (setq desc
                        (or (jcs-poptip--company-doc-buffer backend thing)
                            (ignore-errors (funcall backend 'quickhelp-string thing))
                            (ignore-errors (funcall backend 'meta thing))))
                  desc)
                (jcs-poptip--company-backends)))
-    (jcs-poptip-create desc :point (point))))
+    (jcs-poptip-create (string-trim desc) :point (point))))
 
 ;;;###autoload
 (defun jcs-poptip ()
