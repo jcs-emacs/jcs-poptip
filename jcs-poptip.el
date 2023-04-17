@@ -63,6 +63,16 @@
   "Buffer name for posframe tooltip.")
 
 ;;
+;;; Externals
+
+(defvar company-fuzzy-mode)
+(defvar company-fuzzy--backends)
+(defvar company-backends)
+
+(declare-function company-dict--relevant-dicts "ext:company-dic.el")
+(declare-function company-dict--quickhelp-string "ext:company-dic.el")
+
+;;
 ;;; Util
 
 (defun jcs-poptip-2str (obj)
@@ -124,10 +134,6 @@ forever delay.  HEIGHT of the tooltip that will display."
         (error "[ERROR] No description at point")
       (jcs-poptip-create desc :point (point)))))
 
-(defvar company-fuzzy-mode)
-(defvar company-fuzzy--backends)
-(defvar company-backends)
-
 (defun jcs-poptip--company-backends ()
   "Return a list of company backends."
   (if (bound-and-true-p company-fuzzy-mode)
@@ -161,11 +167,12 @@ forever delay.  HEIGHT of the tooltip that will display."
 
 (defun jcs-poptip--company-dict ()
   "Describe symbol at point."
-  (let* ((thing (jcs-poptip-2str (symbol-at-point)))  ; this has no use
-         (dicts (company-dict--relevant-dicts))
-         (mem (member thing dicts))                   ; it stores in text property
-         (desc (company-dict--quickhelp-string (car mem))))
-    (jcs-poptip-create desc :point (point))))
+  (when (featurep 'company-dict)
+    (let* ((thing (jcs-poptip-2str (symbol-at-point)))  ; this has no use
+           (dicts (company-dict--relevant-dicts))
+           (mem (member thing dicts))                   ; it stores in text property
+           (desc (company-dict--quickhelp-string (car mem))))
+      (jcs-poptip-create desc :point (point)))))
 
 ;;;###autoload
 (defun jcs-poptip ()
