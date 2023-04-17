@@ -18,6 +18,7 @@ an all-in-one package. It uses these packages to grab the information:
 
 - [lsp-ui-doc][] - LSP is smart so don't often need to try other solutions.
 - `describe-thing` - Built-in describe thing at point
+- [company][] - Show company documentation.
 - [company-dict][] - Like built-in `describe-thing` but try to show information
 from completion dictionary.
 - [preview-it][] - Preview `file`, `image`, `url`, and color at the point.
@@ -43,5 +44,6 @@ Any methods are welcome!
 
 [lsp-ui-doc]: https://github.com/emacs-lsp/lsp-ui#lsp-ui-doc
 [preview-it]: https://github.com/jcs-elpa/preview-it
+[company]: https://github.com/company-mode/company-mode
 [company-dict]: https://github.com/hlissner/emacs-company-dict
 [define-it]: https://github.com/jcs-elpa/define-it

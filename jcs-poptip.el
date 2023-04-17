@@ -159,6 +159,14 @@ forever delay.  HEIGHT of the tooltip that will display."
                (jcs-poptip--company-backends)))
     (jcs-poptip-create (string-trim desc) :point (point))))
 
+(defun jcs-poptip--company-dict ()
+  "Describe symbol at point."
+  (let* ((thing (jcs-poptip-2str (symbol-at-point)))  ; this has no use
+         (dicts (company-dict--relevant-dicts))
+         (mem (member thing dicts))                   ; it stores in text property
+         (desc (company-dict--quickhelp-string (car mem))))
+    (jcs-poptip-create desc :point (point))))
+
 ;;;###autoload
 (defun jcs-poptip ()
   "Show current symbol info."
@@ -168,7 +176,8 @@ forever delay.  HEIGHT of the tooltip that will display."
       (or (ignore-errors (call-interactively #'lsp-ui-doc-glance))
           (ignore-errors (call-interactively #'lsp-ui-doc-show)))
     (cond ((ignore-errors (jcs-poptip--describe-it)))
-          ((ignore-errors (jcs-poptip--company-doc)))
+          ((or (ignore-errors (jcs-poptip--company-dict))
+               (ignore-errors (jcs-poptip--company-doc))))
           ((ignore-errors (preview-it)))
           (t (define-it-at-point)))
     ;; In case we are using region, cancel the select region.
