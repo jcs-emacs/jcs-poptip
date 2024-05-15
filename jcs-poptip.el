@@ -75,6 +75,9 @@
 (declare-function company-dict--relevant-dicts "ext:company-dic.el")
 (declare-function company-dict--quickhelp-string "ext:company-dic.el")
 
+(declare-function dap-tooltip-mouse-motion "ext:dap-mouse.el")
+(declare-function lsp-ui-doc--tooltip-mouse-motion "ext:lsp-ui-doc.el")
+
 ;;
 ;;; Modes
 
@@ -127,7 +130,7 @@
 (defun jcs-poptip--pre ()
   "Register for next pre command."
   (when-let* (((not (minibufferp)))
-              ((not (memq this-command '(jcs-poptip-focus jcs-poptip-focus-frame))))
+              ((not (memq this-command '( jcs-poptip-focus jcs-poptip-focus-frame))))
               (buffer (window-buffer (jcs-poptip--posframe-window)))
               ((not (equal (current-buffer) buffer))))
     (add-hook 'post-command-hook #'jcs-poptip--next-post)
@@ -221,6 +224,18 @@ forever delay.  HEIGHT of the tooltip that will display."
       (jcs-poptip-create desc :point (point)))))
 
 ;;
+;;; LSP
+
+(defun jcs-poptip--lsp-pre (&rest _)
+  "Post command for LSP doc."
+  (unless (memq this-command '( handle-switch-frame
+                                lsp-ui-doc--tooltip-mouse-motion
+                                dap-tooltip-mouse-motion))
+    (unless (memq this-command '( jcs-poptip-focus jcs-poptip-focus-frame))
+      (lsp-ui-doc--hide-frame))
+    (remove-hook 'pre-command-hook #'jcs-poptip--lsp-pre)))
+
+;;
 ;;; API
 
 ;;;###autoload
@@ -235,7 +250,8 @@ forever delay.  HEIGHT of the tooltip that will display."
   "Unfocus poptip."
   (interactive)
   (ignore-errors (jcs-poptip-unfocus-frame))
-  (ignore-errors (lsp-ui-doc-unfocus-frame)))
+  (ignore-errors (lsp-ui-doc-unfocus-frame))
+  (add-hook 'pre-command-hook #'jcs-poptip--lsp-pre))
 
 ;;;###autoload
 (defun jcs-poptip ()
