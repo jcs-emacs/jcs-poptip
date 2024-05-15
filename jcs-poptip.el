@@ -62,6 +62,9 @@
 (defconst jcs-poptip--buffer-name "*jcs-poptip*"
   "Buffer name for posframe tooltip.")
 
+(defvar jcs-poptip-frame nil
+  "Hold the frame.")
+
 ;;
 ;;; Externals
 
@@ -73,24 +76,62 @@
 (declare-function company-dict--quickhelp-string "ext:company-dic.el")
 
 ;;
+;;; Modes
+
+(define-minor-mode jcs-poptip-frame-mode
+  "Marker mode to add additional key bind for poptip frame."
+  :init-value nil
+  :lighter ""
+  :group jcs-poptip
+  :keymap `(([?q] . jcs-poptip-unfocus-frame))
+  (when jcs-poptip-frame-mode
+    (buffer-disable-undo)
+    (let ((text-scale-mode-step 1.1))
+      (text-scale-set jcs-poptip-text-scale-level))))
+
+(defun jcs-poptip-focus-frame ()
+  "Focus doc frame."
+  (interactive)
+  (when (and jcs-poptip-frame
+             (frame-visible-p jcs-poptip-frame))
+    (select-frame-set-input-focus jcs-poptip-frame)))
+
+(defun jcs-poptip-unfocus-frame ()
+  "Unfocus doc frame."
+  (interactive)
+  (when (and jcs-poptip-frame
+             (frame-visible-p jcs-poptip-frame))
+    (select-frame-set-input-focus (frame-parent jcs-poptip-frame))))
+
+;;
 ;;; Util
 
 (defun jcs-poptip-2str (obj)
   "Convert OBJ to string."
   (format "%s" obj))
 
+(defun jcs-poptip--posframe-window ()
+  "Return the posframe window displaying `jcs-poptip--buffer-name'."
+  (frame-selected-window
+   (buffer-local-value 'posframe--frame
+                       (get-buffer jcs-poptip--buffer-name))))
+
 ;;
 ;;; Core
 
-(defun jcs-poptip--next ()
+(defun jcs-poptip--next-post ()
   "Hide tooltip after first post command."
   (posframe-hide jcs-poptip--buffer-name)
-  (remove-hook 'post-command-hook #'jcs-poptip--next))
+  (remove-hook 'post-command-hook #'jcs-poptip--next-post))
 
-(defun jcs-poptip--post ()
-  "Register for next post command."
-  (add-hook 'post-command-hook #'jcs-poptip--next)
-  (remove-hook 'post-command-hook #'jcs-poptip--post))
+(defun jcs-poptip--pre ()
+  "Register for next pre command."
+  (when-let* (((not (minibufferp)))
+              ((not (memq this-command '(jcs-poptip-focus jcs-poptip-focus-frame))))
+              (buffer (window-buffer (jcs-poptip--posframe-window)))
+              ((not (equal (current-buffer) buffer))))
+    (add-hook 'post-command-hook #'jcs-poptip--next-post)
+    (remove-hook 'pre-command-hook #'jcs-poptip--pre)))
 
 (cl-defun jcs-poptip-create (string &key point (timeout 300) (height 30))
   "Pop up an tooltip depends on the graphic used.
@@ -102,16 +143,21 @@ forever delay.  HEIGHT of the tooltip that will display."
         (fringe-width 10))
     (cond (elenv-graphic-p
            (with-current-buffer (get-buffer-create jcs-poptip--buffer-name)
-             (let ((text-scale-mode-step 1.1))
-               (text-scale-set jcs-poptip-text-scale-level)))
-           (posframe-show jcs-poptip--buffer-name
-                          :string string :position point
-                          :timeout timeout
-                          :background-color bg :foreground-color fg
-                          :internal-border-width 1
-                          :internal-border-color (face-foreground 'font-lock-comment-face nil t)
-                          :left-fringe fringe-width :right-fringe fringe-width)
-           (add-hook 'post-command-hook #'jcs-poptip--post))
+             (jcs-poptip-frame-mode 1)
+             (setq-local buffer-read-only nil))
+           (setq jcs-poptip-frame
+                 (posframe-show jcs-poptip--buffer-name
+                                :string string :position point
+                                :timeout timeout
+                                :background-color bg :foreground-color fg
+                                :internal-border-width 1
+                                :internal-border-color (face-foreground 'font-lock-comment-face nil t)
+                                :left-fringe fringe-width :right-fringe fringe-width
+                                :override-parameters '((vertical-scroll-bars . t))))
+           (with-current-buffer (get-buffer-create jcs-poptip--buffer-name)
+             (setq-local buffer-read-only t
+                         cursor-type 'hbar))
+           (add-hook 'pre-command-hook #'jcs-poptip--pre))
           (t
            (popup-tip string :point point :around t :height height :scroll-bar t :margin t)))
     t))
@@ -173,6 +219,23 @@ forever delay.  HEIGHT of the tooltip that will display."
            (mem (member thing dicts))                   ; it stores in text property
            (desc (company-dict--quickhelp-string (car mem))))
       (jcs-poptip-create desc :point (point)))))
+
+;;
+;;; API
+
+;;;###autoload
+(defun jcs-poptip-focus ()
+  "Unfocus poptip."
+  (interactive)
+  (ignore-errors (jcs-poptip-focus-frame))
+  (ignore-errors (lsp-ui-doc-focus-frame)))
+
+;;;###autoload
+(defun jcs-poptip-unfocus ()
+  "Unfocus poptip."
+  (interactive)
+  (ignore-errors (jcs-poptip-unfocus-frame))
+  (ignore-errors (lsp-ui-doc-unfocus-frame)))
 
 ;;;###autoload
 (defun jcs-poptip ()
