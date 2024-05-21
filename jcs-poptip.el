@@ -130,7 +130,8 @@
 (defun jcs-poptip--pre ()
   "Register for next pre command."
   (when-let* (((not (minibufferp)))
-              ((not (memq this-command '( jcs-poptip-focus jcs-poptip-focus-frame))))
+              ((not (memq this-command '( jcs-poptip-focus jcs-poptip-focus-frame
+                                          handle-switch-frame))))
               (buffer (window-buffer (jcs-poptip--posframe-window)))
               ((not (equal (current-buffer) buffer))))
     (add-hook 'post-command-hook #'jcs-poptip--next-post)
@@ -156,10 +157,12 @@ forever delay.  HEIGHT of the tooltip that will display."
                                 :internal-border-width 1
                                 :internal-border-color (face-foreground 'font-lock-comment-face nil t)
                                 :left-fringe fringe-width :right-fringe fringe-width
-                                :override-parameters '((vertical-scroll-bars . t))))
+                                :override-parameters '((vertical-scroll-bars . t))
+                                :accept-focus t))
            (with-current-buffer (get-buffer-create jcs-poptip--buffer-name)
              (setq-local buffer-read-only t
                          cursor-type 'hbar))
+           (select-frame-set-input-focus (frame-parent jcs-poptip-frame))
            (add-hook 'pre-command-hook #'jcs-poptip--pre))
           (t
            (popup-tip string :point point :around t :height height :scroll-bar t :margin t)))
