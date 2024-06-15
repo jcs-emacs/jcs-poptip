@@ -202,12 +202,21 @@ forever delay.  HEIGHT of the tooltip that will display."
         (msgu-silent (describe-symbol thing))
         (buffer-string)))))
 
+(defun jcs-poptip--elisp-demos-beg ()
+  "Return package `elisp-demos' beginning point."
+  (save-excursion
+    (goto-char (point-min))
+    (when (search-forward "#+BEGIN_SRC" nil t)
+      (forward-line -1)
+      (line-beginning-position))))
+
 (defun jcs-poptip--fill-text (text &optional column)
   "Fill TEXT with COLUMN size."
   (with-temp-buffer
     (let ((fill-column (or column (frame-width))))
       (insert text)
-      (fill-region (point-min) (point-max))
+      (fill-region (point-min) (or (jcs-poptip--elisp-demos-beg)
+                                   (point-max)))
       (buffer-string))))
 
 (defun jcs-poptip--describe-it ()
