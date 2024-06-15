@@ -202,15 +202,19 @@ forever delay.  HEIGHT of the tooltip that will display."
         (msgu-silent (describe-symbol thing))
         (buffer-string)))))
 
+(defun jcs-poptip--fill-text (text &optional column)
+  "Fill TEXT with COLUMN size."
+  (with-temp-buffer
+    (let ((fill-column (or column (frame-width))))
+      (insert text)
+      (fill-region (point-min) (point-max))
+      (buffer-string))))
+
 (defun jcs-poptip--describe-it ()
   "Describe symbol at point."
   (when-let* (((derived-mode-p 'lisp-data-mode))
               (desc (jcs-poptip--describe-symbol-string))
-              (desc (with-temp-buffer
-                      (let ((fill-column (frame-width)))
-                        (insert desc)
-                        (fill-region (point-min) (point-max))
-                        (buffer-string)))))
+              (desc (jcs-poptip--fill-text desc)))
     (if (or (string-empty-p desc)
             (string= (string-trim desc) "[back]"))
         (error "[ERROR] No description at point")
