@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "jcs-poptip"
          "0.1.0"
          "Generic popup tip")
