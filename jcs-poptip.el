@@ -250,14 +250,13 @@ forever delay.  HEIGHT of the tooltip that will display."
   (let ((thing (jcs-poptip-2str (symbol-at-point)))
         (desc))
     (msgu-silent
-      (cl-some (lambda (backend)
-                 (ignore-errors (funcall backend 'candidates thing))  ; refresh
-                 (setq desc
+      (setq desc
+            (cl-some (lambda (backend)
+                       (ignore-errors (funcall backend 'candidates thing))  ; refresh
                        (or (jcs-poptip--company-doc-buffer backend thing)
                            (ignore-errors (funcall backend 'quickhelp-string thing))
                            (ignore-errors (funcall backend 'meta thing))))
-                 desc)
-               (jcs-poptip--company-backends)))
+                     (jcs-poptip--company-backends))))
     (jcs-poptip-create (string-trim desc) :point (point))))
 
 (defun jcs-poptip--company-dict ()
