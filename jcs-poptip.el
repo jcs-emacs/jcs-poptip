@@ -274,11 +274,16 @@ forever delay.  HEIGHT of the tooltip that will display."
 
 (defun jcs-poptip--lsp-pre (&rest _)
   "Post command for LSP doc."
-  (unless (memq this-command '( handle-switch-frame
-                                lsp-ui-doc--tooltip-mouse-motion
-                                dap-tooltip-mouse-motion))
-    (unless (memq this-command '( jcs-poptip-focus jcs-poptip-focus-frame))
-      (lsp-ui-doc--hide-frame))
+  (when (and (not (frame-parent))
+             (not (memq this-command '( handle-switch-frame
+                                        ignore-preserving-kill-region
+                                        lsp-ui-doc--tooltip-mouse-motion
+                                        dap-tooltip-mouse-motion
+                                        ;; Avoid re-enter.
+                                        jcs-poptip-focus
+                                        jcs-poptip-focus-frame
+                                        jcs-poptip-toggle-focus))))
+    (lsp-ui-doc--hide-frame)
     (remove-hook 'pre-command-hook #'jcs-poptip--lsp-pre)))
 
 ;;
@@ -296,24 +301,29 @@ forever delay.  HEIGHT of the tooltip that will display."
   "Unfocus poptip."
   (interactive)
   (ignore-errors (jcs-poptip-unfocus-frame))
-  (ignore-errors (lsp-ui-doc-unfocus-frame))
-  (add-hook 'pre-command-hook #'jcs-poptip--lsp-pre))
+  (ignore-errors (lsp-ui-doc-unfocus-frame)))
+
+;;;###autoload
+(defun jcs-poptip-toggle-focus ()
+  "Unfocus poptip."
+  (interactive)
+  (if (frame-parent) (jcs-poptip-unfocus) (jcs-poptip-focus)))
 
 ;;;###autoload
 (defun jcs-poptip ()
   "Show current symbol info."
   (interactive)
   (company-abort)
-  (if (bound-and-true-p lsp-managed-mode)  ; if lsp is connected
-      (or (ignore-errors (call-interactively #'lsp-ui-doc-glance))
-          (ignore-errors (call-interactively #'lsp-ui-doc-show)))
-    (cond ((ignore-errors (jcs-poptip--describe-it)))
-          ((or (ignore-errors (jcs-poptip--company-dict))
-               (ignore-errors (jcs-poptip--company-doc))))
-          ((ignore-errors (preview-it)))
-          (t (define-it-at-point)))
-    ;; In case we are using region, cancel the select region.
-    (deactivate-mark)))
+  (cond ((bound-and-true-p lsp-managed-mode)
+         (ignore-errors (call-interactively #'lsp-ui-doc-show))
+         (add-hook 'pre-command-hook #'jcs-poptip--lsp-pre))
+        ((ignore-errors (jcs-poptip--describe-it)))
+        ((or (ignore-errors (jcs-poptip--company-dict))
+             (ignore-errors (jcs-poptip--company-doc))))
+        ((ignore-errors (preview-it)))
+        (t (define-it-at-point)))
+  ;; In case we are using region, cancel the select region.
+  (deactivate-mark))
 
 (provide 'jcs-poptip)
 ;;; jcs-poptip.el ends here
