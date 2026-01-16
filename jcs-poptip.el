@@ -147,7 +147,6 @@ forever delay.  HEIGHT of the tooltip that will display."
         (fringe-width 10))
     (cond (elenv-graphic-p
            (with-current-buffer (get-buffer-create jcs-poptip--buffer-name)
-             (jcs-poptip-frame-mode 1)
              (setq-local buffer-read-only nil))
            (setq jcs-poptip-frame
                  (posframe-show jcs-poptip--buffer-name
@@ -186,7 +185,8 @@ forever delay.  HEIGHT of the tooltip that will display."
                                 :accept-focus t))
            (with-current-buffer (get-buffer-create jcs-poptip--buffer-name)
              (setq-local buffer-read-only t
-                         cursor-type 'hbar))
+                         cursor-type 'hbar)
+             (jcs-poptip-frame-mode 1))
            (select-frame-set-input-focus (frame-parent jcs-poptip-frame))
            (add-hook 'pre-command-hook #'jcs-poptip--pre))
           (t
